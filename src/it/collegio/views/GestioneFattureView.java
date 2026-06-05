@@ -2,7 +2,6 @@ package it.collegio.views;
 
 import it.collegio.controllers.FatturaController;
 import it.collegio.dto.FatturaDettaglio;
-import it.collegio.enums.FatturaStatus;
 import it.collegio.models.MetodoPagamento;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -15,6 +14,9 @@ public class GestioneFattureView extends javax.swing.JFrame {
 
     private final FatturaController controller;
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    /** Lista corrente delle fatture mostrate in tabella, per leggere lo stato della reservation di ogni riga. */
+    private List<FatturaDettaglio> dettagliCorrenti = java.util.Collections.emptyList();
 
     public GestioneFattureView() {
         this.controller = new FatturaController();
@@ -35,10 +37,11 @@ public class GestioneFattureView extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) fattureTable.getModel();
         model.setRowCount(0);
 
-        List<FatturaDettaglio> dettagli = controller.getDettagliPerRuolo();
-        for (FatturaDettaglio d : dettagli) {
+        dettagliCorrenti = controller.getDettagliPerRuolo();
+        for (FatturaDettaglio d : dettagliCorrenti) {
             String dataStr = d.getDataEmissione() != null ? d.getDataEmissione().format(DATE_FMT) : "";
             String statoStr = d.getStato() != null ? d.getStato().getDbValue() : "";
+            String resStato = d.getReservationStato() != null ? d.getReservationStato() : "";
 
             model.addRow(new Object[]{
                 d.getFatturaId(),
@@ -47,23 +50,31 @@ public class GestioneFattureView extends javax.swing.JFrame {
                 d.getNumeroStanza(),
                 String.format("€ %.2f", d.getImporto()),
                 dataStr,
-                statoStr
+                statoStr,
+                resStato
             });
         }
     }
 
     private void aggiornaBottoniPerRiga() {
         int row = fattureTable.getSelectedRow();
-        if (row < 0) {
+        if (row < 0 || row >= dettagliCorrenti.size()) {
             pagaButton.setEnabled(false);
             annullaButton.setEnabled(false);
             return;
         }
-        String statoStr = (String) ((DefaultTableModel) fattureTable.getModel()).getValueAt(row, 6);
-        FatturaStatus stato = FatturaStatus.fromDb(statoStr);
-        boolean pagabile = controller.isPagabile(stato);
+        FatturaDettaglio d = dettagliCorrenti.get(row);
+        boolean fatturaPagabile = controller.isPagabile(d.getStato());
+        boolean reservationPagabile = isReservationPagabile(d.getReservationStato());
+        boolean pagabile = fatturaPagabile && reservationPagabile;
         pagaButton.setEnabled(pagabile);
         annullaButton.setEnabled(pagabile);
+    }
+
+    /** Una fattura e' pagabile solo se la prenotazione e' chiusa (completata o cancellata). */
+    private static boolean isReservationPagabile(String reservationStato) {
+        return "completata".equalsIgnoreCase(reservationStato)
+            || "cancellata".equalsIgnoreCase(reservationStato);
     }
 
     private int getSelectedFatturaId() {
@@ -156,7 +167,7 @@ public class GestioneFattureView extends javax.swing.JFrame {
         fattureTable = new javax.swing.JTable();
         fattureTable.setModel(new DefaultTableModel(
                 new Object[][]{},
-                new String[]{"ID", "Prenotazione", "Cliente", "Camera", "Importo", "Data", "Stato"}
+                new String[]{"ID", "Prenotazione", "Cliente", "Camera", "Importo", "Data", "Stato", "Stato Prenot."}
         ) {
             @Override
             public boolean isCellEditable(int row, int col) {
