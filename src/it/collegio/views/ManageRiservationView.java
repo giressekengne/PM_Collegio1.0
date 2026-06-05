@@ -42,6 +42,38 @@ public class ManageRiservationView extends javax.swing.JFrame{
         wireActionListeners();
         loadTable();
         configureForRole();
+
+        // Click su una riga della tabella -> ricerca dettaglio via Controller e popola il form
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                int row = jTable1.getSelectedRow();
+                if (row < 0) return;
+                Object idCell = jTable1.getValueAt(row, 0);
+                if (idCell == null) return;
+                try {
+                    int reservationId = utility.convInt(idCell.toString());
+                    ReservationDettaglio d = controller.cercaDettaglio(reservationId);
+                    if (d != null) popolaForm(d);
+                } catch (Exception ex) {
+                    // ID non interpretabile: ignora silenziosamente
+                }
+            }
+        });
+    }
+
+    /** Popola tutti i campi del form a partire dal DTO ricevuto dal Controller. */
+    private void popolaForm(ReservationDettaglio d) {
+        idTextField.setText(utility.convAlfaP(d.getReservationId()));
+        userTextField.setText(d.getUserNome());
+        committenteTextField.setText(String.valueOf(d.getCommittenteId()));
+        rnTextField.setText(utility.convAlfaR(d.getRoomId()));
+        cidTextField.setText(d.getCheckIn());
+        codTextField.setText(d.getCheckOut() != null ? d.getCheckOut() : "");
+        ppdTextField.setText(d.getStato());
+        noteTextField.setText(d.getNote() != null ? d.getNote() : "");
+        nodTextField.setText(String.valueOf(d.getGiorni()));
+        totalTextField.setText(String.valueOf(d.getTotale()));
     }
 
     private void wireActionListeners() {
@@ -111,15 +143,7 @@ public class ManageRiservationView extends javax.swing.JFrame{
             return;
         }
 
-        userTextField.setText(d.getUserNome());
-        committenteTextField.setText(String.valueOf(d.getCommittenteId()));
-        rnTextField.setText(utility.convAlfaR(d.getRoomId()));
-        cidTextField.setText(d.getCheckIn());
-        codTextField.setText(d.getCheckOut() != null ? d.getCheckOut() : "");
-        ppdTextField.setText(d.getStato());
-        noteTextField.setText(d.getNote() != null ? d.getNote() : "");
-        nodTextField.setText(String.valueOf(d.getGiorni()));
-        totalTextField.setText(String.valueOf(d.getTotale()));
+        popolaForm(d);
     }
 
     private void conferma() {
