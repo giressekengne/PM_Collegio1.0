@@ -45,9 +45,17 @@ public class FatturaView extends javax.swing.JFrame {
         FatturaStatus stato = dettaglio.getStato();
         statoValueLabel.setText(stato != null ? stato.getDbValue() : "---");
 
-        boolean pagabile = stato == FatturaStatus.IN_ATTESA;
+        boolean fatturaPagabile = stato == FatturaStatus.IN_ATTESA;
+        boolean reservationPagabile = isReservationPagabile(dettaglio.getReservationStato());
+        boolean pagabile = fatturaPagabile && reservationPagabile;
         pagaButton.setEnabled(pagabile);
         annullaButton.setEnabled(pagabile);
+    }
+
+    /** Una fattura e' pagabile solo se la prenotazione e' chiusa (completata o cancellata). */
+    private static boolean isReservationPagabile(String reservationStato) {
+        return "completata".equalsIgnoreCase(reservationStato)
+            || "cancellata".equalsIgnoreCase(reservationStato);
     }
 
     private void paga() {
