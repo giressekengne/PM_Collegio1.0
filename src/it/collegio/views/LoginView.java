@@ -200,7 +200,11 @@ public class LoginView extends javax.swing.JFrame{
         LoginResponse response = controller.login(email, password);
 
         if (response.isSuccessful()) {
-            new HomeView().setVisible(true);
+            if ("AS".equalsIgnoreCase(it.collegio.utilities.SessionContext.roleType)) {
+                new SelectCommittenteView().setVisible(true);
+            } else {
+                new HomeView().setVisible(true);
+            }
             this.dispose();
         } else {
             JOptionPane.showMessageDialog(this, response.getErrorMessage(),

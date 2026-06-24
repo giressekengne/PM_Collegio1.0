@@ -2,8 +2,10 @@
 package it.collegio.views;
 
 import it.collegio.controllers.RegistrationController;
+import it.collegio.dto.CommittenteDettaglio;
 import it.collegio.dto.LoginResponse;
 import it.collegio.utilities.utility;
+import java.util.List;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import javax.swing.ImageIcon;
@@ -13,9 +15,11 @@ public class RegistrationView extends javax.swing.JFrame {
 
     int flag = 0;
     private final RegistrationController controller = new RegistrationController();
+    private List<CommittenteDettaglio> committenti;
 
      public RegistrationView() {
         initComponents();
+        popolaCommittenti();
     }
      
     
@@ -35,6 +39,8 @@ public class RegistrationView extends javax.swing.JFrame {
         surnameLabel = new javax.swing.JLabel();
         emailLabel = new javax.swing.JLabel();
         genderLabel = new javax.swing.JLabel();
+        committenteLabel = new javax.swing.JLabel();
+        committenteComboBox = new javax.swing.JComboBox<>();
         registrationButton = new javax.swing.JButton();
         back2loginButton = new javax.swing.JButton();
         questionComboBox = new javax.swing.JComboBox<>();
@@ -84,6 +90,11 @@ public class RegistrationView extends javax.swing.JFrame {
 
         genderLabel.setFont(new java.awt.Font("Lucida Grande", 3, 14)); // NOI18N
         genderLabel.setText("Gender");
+
+        committenteLabel.setFont(new java.awt.Font("Lucida Grande", 3, 14)); // NOI18N
+        committenteLabel.setText("Committente");
+
+        committenteComboBox.setFont(new java.awt.Font("Lucida Grande", 3, 14)); // NOI18N
 
         registrationButton.setBackground(new java.awt.Color(0, 204, 153));
         registrationButton.setFont(new java.awt.Font("Lucida Grande", 3, 14)); // NOI18N
@@ -222,6 +233,11 @@ public class RegistrationView extends javax.swing.JFrame {
                         .addGap(54, 54, 54)
                         .addComponent(questionComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(34, 34, 34)
+                        .addComponent(committenteLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(54, 54, 54)
+                        .addComponent(committenteComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(23, 23, 23)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(registrationButton, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -299,7 +315,13 @@ public class RegistrationView extends javax.swing.JFrame {
                         .addGap(8, 8, 8)
                         .addComponent(questionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(questionComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(26, 26, 26)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(5, 5, 5)
+                        .addComponent(committenteLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(committenteComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(6, 6, 6)
@@ -312,7 +334,7 @@ public class RegistrationView extends javax.swing.JFrame {
                 .addContainerGap(19, Short.MAX_VALUE))
         );
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 150, 570, 640));
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 150, 570, -1));
 
         closeButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/image/close.png"))); // NOI18N
         closeButton.addActionListener(new java.awt.event.ActionListener() {
@@ -380,6 +402,16 @@ public class RegistrationView extends javax.swing.JFrame {
             return;
         }
 
+        int selectedCommittente = -1;
+        int cidx = committenteComboBox.getSelectedIndex();
+        if (cidx >= 0 && committenti != null && !committenti.isEmpty()) {
+            selectedCommittente = committenti.get(cidx).getCodCommittente();
+        } else {
+            JOptionPane.showMessageDialog(this, "Seleziona un committente");
+            committenteComboBox.requestFocus();
+            return;
+        }
+
         LoginResponse response = controller.registra(
                 nameTextField.getText(),
                 surnameTextField.getText(),
@@ -389,7 +421,8 @@ public class RegistrationView extends javax.swing.JFrame {
                 (String) adressComboBox.getSelectedItem(),
                 (String) questionComboBox.getSelectedItem(),
                 responseTextField.getText(),
-                (String) genderComboBox.getSelectedItem());
+                (String) genderComboBox.getSelectedItem(),
+                selectedCommittente);
 
         if (response.isSuccessful()) {
             JOptionPane.showMessageDialog(this,
@@ -405,6 +438,15 @@ public class RegistrationView extends javax.swing.JFrame {
     private void back2loginButtonActionPerformed(java.awt.event.ActionEvent evt) {
         new LoginView().setVisible(true);
         this.dispose();
+    }
+
+    private void popolaCommittenti() {
+        committenti = controller.getCommittenti();
+        javax.swing.DefaultComboBoxModel<String> model = new javax.swing.DefaultComboBoxModel<>();
+        for (CommittenteDettaglio c : committenti) {
+            model.addElement(c.getRagioneSociale() + " (ID: " + c.getCodCommittente() + ")");
+        }
+        committenteComboBox.setModel(model);
     }
 
     private void pwVisibilitaLabelMouseClicked(java.awt.event.MouseEvent evt) {                                               
@@ -546,8 +588,10 @@ public class RegistrationView extends javax.swing.JFrame {
         });
     }
 
-    // Variables declaration - do not modify                     
+    // Variables declaration - do not modify
     private javax.swing.JComboBox<String> adressComboBox;
+    private javax.swing.JComboBox<String> committenteComboBox;
+    private javax.swing.JLabel committenteLabel;
     private javax.swing.JLabel adressLabel;
     private javax.swing.JButton back2loginButton;
     private javax.swing.JLabel bgLabel;

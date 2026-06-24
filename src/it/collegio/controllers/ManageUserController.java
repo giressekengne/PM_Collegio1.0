@@ -25,11 +25,18 @@ public class ManageUserController {
     }
 
     public List<User> getUsersPerRuolo() {
-        if ("U".equalsIgnoreCase(SessionContext.roleType)) {
+        String role = SessionContext.roleType;
+        if ("U".equalsIgnoreCase(role)) {
             User self = userDao.getByCounter(SessionContext.userCounter);
             List<User> only = new ArrayList<>();
             if (self != null) only.add(self);
             return only;
+        }
+        if ("AC".equalsIgnoreCase(role)) {
+            return userDao.getByCommittenteExcludeAS(SessionContext.committenteId);
+        }
+        if ("AR".equalsIgnoreCase(role)) {
+            return userDao.getByCommittenteForAR(SessionContext.committenteId);
         }
         return userDao.getAll();
     }

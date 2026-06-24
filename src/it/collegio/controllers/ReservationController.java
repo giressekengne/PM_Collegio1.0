@@ -30,8 +30,12 @@ public class ReservationController {
     }
 
     public List<ReservationDettaglio> getDettagliPerRuolo() {
-        if ("U".equalsIgnoreCase(SessionContext.roleType)) {
+        String role = SessionContext.roleType;
+        if ("U".equalsIgnoreCase(role)) {
             return reservationDao.getDettagliByUser(SessionContext.userCounter);
+        }
+        if ("AC".equalsIgnoreCase(role) || "AR".equalsIgnoreCase(role)) {
+            return reservationDao.getDettagliByCommittente(SessionContext.committenteId);
         }
         return reservationDao.getDettagli();
     }

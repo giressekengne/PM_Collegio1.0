@@ -1,7 +1,9 @@
 package it.collegio.controllers;
 
+import it.collegio.dao.CommittenteDao;
 import it.collegio.dao.IndirizzoDao;
 import it.collegio.dao.UserDao;
+import it.collegio.dto.CommittenteDettaglio;
 import it.collegio.dto.LoginResponse;
 import it.collegio.enums.Genere;
 import it.collegio.enums.UserStatus;
@@ -11,16 +13,22 @@ import java.util.List;
 
 public class RegistrationController {
 
-    private static final int DEFAULT_COMMITTENTE = 1;
     private static final int DEFAULT_ROLE_CLIENTE = 4;
     private static final int DEFAULT_INDIRIZZO_FALLBACK = 1;
 
     private final UserDao userDao;
     private final IndirizzoDao indirizzoDao;
+    private final CommittenteDao committenteDao;
 
     public RegistrationController() {
         this.userDao = new UserDao();
         this.indirizzoDao = new IndirizzoDao();
+        this.committenteDao = new CommittenteDao();
+    }
+
+    /** Committenti disponibili per il combo nel form di registrazione. */
+    public List<CommittenteDettaglio> getCommittenti() {
+        return committenteDao.getDettagli();
     }
 
     /** Indirizzi disponibili per il combo "via" nel form di registrazione. */
@@ -36,7 +44,7 @@ public class RegistrationController {
     public LoginResponse registra(String nome, String cognome, String email,
                                    String password, String telefono,
                                    String via, String domanda, String risposta,
-                                   String genere) {
+                                   String genere, int committenteId) {
 
         if (nome == null || nome.isEmpty()
                 || email == null || email.isEmpty()
@@ -66,7 +74,7 @@ public class RegistrationController {
         user.setEmail(email.toLowerCase());
         user.setPw(password);
         user.setRole(DEFAULT_ROLE_CLIENTE);
-        user.setCommittente(DEFAULT_COMMITTENTE);
+        user.setCommittente(committenteId);
         user.setStato(UserStatus.ATTESA);
         user.setMobile(telefono);
         user.setAddress(indirizzoId);

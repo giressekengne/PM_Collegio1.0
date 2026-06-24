@@ -28,8 +28,12 @@ public class FatturaController {
     }
 
     public List<FatturaDettaglio> getDettagliPerRuolo() {
-        if ("U".equalsIgnoreCase(SessionContext.roleType)) {
+        String role = SessionContext.roleType;
+        if ("U".equalsIgnoreCase(role)) {
             return fatturaDao.getDettagliByUser(SessionContext.userCounter);
+        }
+        if ("AC".equalsIgnoreCase(role) || "AR".equalsIgnoreCase(role)) {
+            return fatturaDao.getDettagliByCommittente(SessionContext.committenteId);
         }
         return fatturaDao.getDettagli();
     }

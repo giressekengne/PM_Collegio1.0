@@ -56,6 +56,10 @@ public class ManageTenantController {
         return committenteDao.insertCommittenteWithId(c);
     }
 
+    public void selezionaCommittente(int committenteId) {
+        it.collegio.utilities.SessionContext.committenteId = committenteId;
+    }
+
     public boolean updateCommittente(int codCommittente, String ragioneSociale,
                                       String gestoreEmail, String email,
                                       String telefono, String via) {

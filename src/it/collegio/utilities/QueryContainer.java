@@ -176,6 +176,36 @@ public final class QueryContainer {
       "INSERT INTO StoricoPrenotazioni(reservation_id, user_id, check_in_precedente, check_out_precedente, nuovo_check_in, nuovo_check_out, data_modifica) " +
       "VALUES (?, ?, ?, ?, ?, ?, ?);";
 
+  public static String queryGetUsersByCommittenteNoAS =
+      "SELECT U.* FROM User U " +
+      "INNER JOIN Mansione M ON M.role_id = U.ruolo " +
+      "WHERE U.committente_id = ? AND M.role_type != 'AS';";
+
+  public static String queryGetUsersByCommittenteForAR =
+      "SELECT U.* FROM User U " +
+      "INNER JOIN Mansione M ON M.role_id = U.ruolo " +
+      "WHERE U.committente_id = ? AND M.role_type NOT IN ('AS', 'AC');";
+
+  public static String queryGetReservationDettagliByCommittente =
+      "SELECT Re.reservation_id, U.nome AS user_nome, Re.committente_id, Re.room_id, R.prezzo, " +
+      "Re.check_in, Re.check_out, Re.status, Re.note, Re.giorni, " +
+      "(R.prezzo * COALESCE(Re.giorni, 1)) AS totale " +
+      "FROM Reservation Re " +
+      "INNER JOIN User U ON U.user_counter = Re.user_id " +
+      "INNER JOIN Room R ON R.room_id = Re.room_id " +
+      "WHERE Re.committente_id = ? " +
+      "ORDER BY Re.reservation_id DESC;";
+
+  public static String queryGetFattureDettagliateByCommittente =
+      "SELECT F.fattura_id, F.reservation_id, U.nome, R.numero_stanza, " +
+      "F.importo, F.data_emissione, F.stato, Res.status " +
+      "FROM Fattura F " +
+      "JOIN Reservation Res ON Res.reservation_id = F.reservation_id " +
+      "JOIN User U ON U.user_counter = Res.user_id " +
+      "JOIN Room R ON R.room_id = Res.room_id " +
+      "WHERE Res.committente_id = ? " +
+      "ORDER BY F.fattura_id DESC;";
+
   public static String queryGetStoricoByReservation =
       "SELECT * FROM StoricoPrenotazioni WHERE reservation_id = ? ORDER BY data_modifica DESC;";
 

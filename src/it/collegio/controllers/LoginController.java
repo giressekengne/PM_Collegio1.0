@@ -1,5 +1,6 @@
 package it.collegio.controllers;
 
+import it.collegio.config.AppConfig;
 import it.collegio.dao.AccessLogDao;
 import it.collegio.dao.MansioneDao;
 import it.collegio.dao.SessionsDao;
@@ -44,6 +45,11 @@ public class LoginController {
         }
 
         Mansione mansione = mansioneDao.getById(user.getRole());
+
+        boolean isAS = mansione != null && "AS".equalsIgnoreCase(mansione.getTipo());
+        if (!isAS && user.getCommittente() != AppConfig.getCommittenteId()) {
+            return LoginResponse.error("Committente sbagliato");
+        }
 
         AccessLog log = new AccessLog(user.getCounter(), "127.0.0.1", "Desktop App");
         int logId = accessLogDao.insertLog(log);

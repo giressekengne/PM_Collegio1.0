@@ -174,6 +174,21 @@ public class ReservationDao {
         return dettagli;
     }
 
+    public List<ReservationDettaglio> getDettagliByCommittente(int committenteId) {
+        List<ReservationDettaglio> dettagli = new ArrayList<>();
+        try (PreparedStatement pst = dbConnection.getConnection().prepareStatement(QueryContainer.queryGetReservationDettagliByCommittente)) {
+            pst.setInt(1, committenteId);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    dettagli.add(mapDettaglio(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return dettagli;
+    }
+
     public List<ReservationDettaglio> getDettagliByUser(String userCounter) {
         List<ReservationDettaglio> dettagli = new ArrayList<>();
         try (PreparedStatement pst = dbConnection.getConnection().prepareStatement(QueryContainer.queryGetReservationDettagliByUser)) {

@@ -19,6 +19,10 @@ public class ManageRoomController {
     }
 
     public List<Room> getRooms() {
+        String role = SessionContext.roleType;
+        if ("AC".equalsIgnoreCase(role) || "AR".equalsIgnoreCase(role)) {
+            return roomDao.getByCommittente(SessionContext.committenteId);
+        }
         return roomDao.getAll();
     }
 

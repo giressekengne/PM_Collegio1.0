@@ -162,6 +162,21 @@ public class FatturaDao {
         return dettagli;
     }
 
+    public List<FatturaDettaglio> getDettagliByCommittente(int committenteId) {
+        List<FatturaDettaglio> dettagli = new ArrayList<>();
+        try (PreparedStatement pst = dbConnection.getConnection().prepareStatement(QueryContainer.queryGetFattureDettagliateByCommittente)) {
+            pst.setInt(1, committenteId);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    dettagli.add(mapDettaglio(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(FatturaDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return dettagli;
+    }
+
     public List<FatturaDettaglio> getDettagliByUser(String userCounter) {
         List<FatturaDettaglio> dettagli = new ArrayList<>();
         String query = QueryContainer.queryGetFattureDettagliateByUser;

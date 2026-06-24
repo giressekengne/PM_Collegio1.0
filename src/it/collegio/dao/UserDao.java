@@ -124,6 +124,36 @@ public class UserDao {
         return users;
     }
 
+    public java.util.List<User> getByCommittenteForAR(int committenteId){
+        java.util.List<User> users = new java.util.ArrayList<>();
+        try (PreparedStatement pst = this.dbConnection.getConnection().prepareStatement(QueryContainer.queryGetUsersByCommittenteForAR)) {
+            pst.setInt(1, committenteId);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    users.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(UserDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return users;
+    }
+
+    public java.util.List<User> getByCommittenteExcludeAS(int committenteId){
+        java.util.List<User> users = new java.util.ArrayList<>();
+        try (PreparedStatement pst = this.dbConnection.getConnection().prepareStatement(QueryContainer.queryGetUsersByCommittenteNoAS)) {
+            pst.setInt(1, committenteId);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    users.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(UserDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return users;
+    }
+
     public java.util.List<User> getByCommittente(int committenteId){
         java.util.List<User> users = new java.util.ArrayList<>();
         try (PreparedStatement pst = this.dbConnection.getConnection().prepareStatement(QueryContainer.queryUsersByCom)) {
